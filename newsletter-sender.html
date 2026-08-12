@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Newsletter Sender</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding: 24px;
+        }
+        .container { max-width: 900px; margin: 0 auto; }
+        h1 { text-align: center; font-size: 24px; color: #1a1a2e; margin-bottom: 4px; }
+        .subtitle { text-align: center; color: #6b7280; font-size: 14px; margin-bottom: 24px; }
+        .card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .form-group { margin-bottom: 16px; }
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+        input[type="text"], input[type="email"], textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input:focus, textarea:focus { border-color: #6366f1; }
+        textarea { resize: vertical; min-height: 220px; line-height: 1.5; }
+        .file-row { display: flex; align-items: center; gap: 8px; }
+        .file-row input[readonly] { background: #f9fafb; color: #6b7280; flex: 1; }
+        .btn-browse {
+            padding: 8px 16px;
+            background: #f3f4f6;
+            border: 1px solid #9ca3af;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #374151;
+            cursor: pointer;
+        }
+        .btn-browse:hover { background: #e5e7eb; }
+        .hint { font-size: 12px; color: #9ca3af; margin-top: 6px; }
+        .controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #e5e7eb;
+        }
+        .radio-group { display: flex; align-items: center; gap: 12px; }
+        .radio-group label { display: flex; align-items: center; gap: 6px; font-size: 14px; cursor: pointer; margin: 0; }
+        .btn-send {
+            padding: 10px 28px;
+            background: #fff;
+            border: 2px solid #374151;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1f2937;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-send:hover:not(:disabled) { background: #1f2937; color: #fff; }
+        .btn-send:disabled { opacity: 0.5; cursor: not-allowed; }
+        .status {
+            margin-top: 16px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+        }
+        .status.success { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .status.error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+        .progress { margin-top: 8px; height: 6px; background: #e5e7eb; border-radius: 3px; overflow: hidden; }
+        .progress-bar { height: 100%; background: #6366f1; width: 0%; transition: width 0.3s; }
+        @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📧 Newsletter Sender</h1>
+        <p class="subtitle">Compose and send bulk emails to your customers</p>
+        <div class="card">
+            <form id="newsletterForm" enctype="multipart/form-data">
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="fromEmail">Your Email:</label>
+                        <input type="email" id="fromEmail" name="fromEmail" placeholder="sender@yourcompany.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="fromName">Your Name:</label>
+                        <input type="text" id="fromName" name="fromName" placeholder="Your Company Name">
+                    </div>
+                    <div class="form-group">
+                        <label for="replyTo">Reply-To:</label>
+                        <input type="email" id="replyTo" name="replyTo" placeholder="replies@yourcompany.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="attachment">Attach File:</label>
+                        <div class="file-row">
+                            <input type="text" id="fileName" readonly placeholder="No file selected">
+                            <label class="btn-browse">
+                                Browse
+                                <input type="file" id="attachment" name="attachment" style="display:none"
+                                    onchange="document.getElementById('fileName').value = this.files[0]?.name || 'No file selected'">
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="subject">Subject:</label>
+                    <input type="text" id="subject" name="subject" placeholder="July Newsletter: What's New This Month" required>
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="letter">Letter:</label>
+                        <textarea id="letter" name="letter" placeholder="Dear Customer,&#10;&#10;We're excited to share our latest updates..." required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="recipients">Recipients:</label>
+                        <textarea id="recipients" name="recipients" placeholder="customer1@email.com&#10;customer2@email.com&#10;customer3@email.com" required></textarea>
+                        <p class="hint">One email per line, or comma-separated</p>
+                    </div>
+                </div>
+                <div class="controls">
+                    <div class="radio-group">
+                        <label><input type="radio" name="format" value="plain"> Plain</label>
+                        <label><input type="radio" name="format" value="html" checked> HTML</label>
+                    </div>
+                    <button type="submit" class="btn-send" id="sendBtn">Send Emails</button>
+                </div>
+                <div id="status" class="status"></div>
+                <div class="progress" id="progressContainer" style="display:none;">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+        const form = document.getElementById('newsletterForm');
+        const sendBtn = document.getElementById('sendBtn');
+        const status = document.getElementById('status');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const API_URL = window.location.origin.includes('localhost')
+            ? 'http://localhost:3000/api/send-newsletter'
+            : '/api/send-newsletter';
+        function showStatus(msg, type) {
+            status.textContent = msg;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+        }
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            sendBtn.disabled = true;
+            sendBtn.textContent = 'Sending...';
+            status.style.display = 'none';
+            progressContainer.style.display = 'block';
+            progressBar.style.width = '10%';
+            const formData = new FormData(form);
+            try {
+                progressBar.style.width = '40%';
+                const response = await fetch(API_URL, { method: 'POST', body: formData });
+                progressBar.style.width = '80%';
+                const data = await response.json();
+                progressBar.style.width = '100%';
+                if (data.success) {
+                    const { sent, failed, total } = data.summary;
+                    let msg = `Sent ${sent} of ${total} emails successfully.`;
+                    if (failed > 0) msg += ` ${failed} failed.`;
+                    showStatus(msg, 'success');
+                    form.reset();
+                    document.getElementById('fileName').value = 'No file selected';
+                } else {
+                    showStatus(`Error: ${data.error}`, 'error');
+                }
+            } catch (err) {
+                showStatus(`Network error: ${err.message}`, 'error');
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.textContent = 'Send Emails';
+                setTimeout(() => { progressContainer.style.display = 'none'; }, 2000);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -160,9 +160,7 @@
         const status = document.getElementById('status');
         const progressContainer = document.getElementById('progressContainer');
         const progressBar = document.getElementById('progressBar');
-        const API_URL = window.location.origin.includes('localhost')
-            ? 'http://localhost:3000/api/send-newsletter'
-            : '/api/send-newsletter';
+        const API_URL = 'https://richard-frank.onrender.com/api/send-newsletter';
         function showStatus(msg, type) {
             status.textContent = msg;
             status.className = `status ${type}`;
